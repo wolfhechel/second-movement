@@ -5,13 +5,19 @@ PATH := $(PATH):/usr/lib/emscripten
 
 -include Makefile
 
-build-sim/firmware.html: $(SRCS)
+sim:
 	emmake $(MAKE)
 
-emulate: build-sim/firmware.html
+ifndef EMSCRIPTEN
+build/movement.o: movement_config.h
+else
+build-sim/movement.o: movement_config.h
+endif
+
+serve: build-sim/firmware.html
 	xdg-open "http://localhost:8000/firmware.html"
 	python -m http.server -d build-sim
 
-clean-all:
-	$(MAKE) clean
-	emmake $(MAKE) clean
+clean:
+	$(MAKE) -f Makefile clean
+	emmake $(MAKE) -f Makefile clean
