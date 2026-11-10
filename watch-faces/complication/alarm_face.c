@@ -36,14 +36,6 @@
 static void _alarm_face_display_alarm_time(alarm_face_state_t *state) {
     uint8_t hour = state->hour;
 
-    if ( movement_clock_mode_24h() )
-        watch_set_indicator(WATCH_INDICATOR_24H);
-    else {
-        if ( hour >= 12 ) watch_set_indicator(WATCH_INDICATOR_PM);
-        else watch_clear_indicator(WATCH_INDICATOR_PM);
-        hour = hour % 12 ? hour % 12 : 12;
-    }
-
     static char lcdbuf[7];
     sprintf(lcdbuf, "%2d%02d  ", hour, state->minute);
 
@@ -86,7 +78,7 @@ bool alarm_face_loop(movement_event_t event, void *context) {
     switch (event.event_type) {
         case EVENT_ACTIVATE:
             watch_display_text_with_fallback(WATCH_POSITION_TOP_LEFT, "ALM", "AL");
-            if (state->alarm_is_on) watch_set_indicator(WATCH_INDICATOR_SIGNAL);
+            if (state->alarm_is_on) watch_set_indicator(WATCH_INDICATOR_BELL);
             watch_set_colon();
             _alarm_face_display_alarm_time(state);
             break;
@@ -119,7 +111,7 @@ bool alarm_face_loop(movement_event_t event, void *context) {
                     // also turn the alarm on since they just set it.
                     state->alarm_is_on = 1;
                     movement_set_alarm_enabled(true);
-                    watch_set_indicator(WATCH_INDICATOR_SIGNAL);
+                    watch_set_indicator(WATCH_INDICATOR_BELL);
                     _alarm_face_display_alarm_time(state);
                     break;
             }
@@ -129,10 +121,10 @@ bool alarm_face_loop(movement_event_t event, void *context) {
                 // in normal mode, toggle alarm on/off.
                 state->alarm_is_on ^= 1;
                 if ( state->alarm_is_on ) {
-                    watch_set_indicator(WATCH_INDICATOR_SIGNAL);
+                    watch_set_indicator(WATCH_INDICATOR_BELL);
                     movement_set_alarm_enabled(true);
                 } else {
-                    watch_clear_indicator(WATCH_INDICATOR_SIGNAL);
+                    watch_clear_indicator(WATCH_INDICATOR_BELL);
                     movement_set_alarm_enabled(false);
                 }
             }

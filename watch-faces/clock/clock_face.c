@@ -51,7 +51,7 @@ static void clock_indicate(watch_indicator_t indicator, bool on) {
 }
 
 static void clock_indicate_alarm() {
-    clock_indicate(WATCH_INDICATOR_SIGNAL, movement_alarm_enabled());
+    clock_indicate(WATCH_INDICATOR_BELL, movement_alarm_enabled());
 }
 
 static void clock_indicate_time_signal(clock_state_t *state) {
@@ -111,21 +111,29 @@ static void clock_toggle_time_signal(clock_state_t *state) {
 }
 
 static void clock_display_all(watch_date_time_t date_time) {
-    char buf[8 + 1];
+    char buf[11 + 1];
+
+    uint8_t weeknumber = watch_utility_get_weeknumber(
+        date_time.unit.year,
+        date_time.unit.month,
+        date_time.unit.day
+    );
 
     snprintf(
         buf,
         sizeof(buf),
-        movement_clock_mode_24h() == MOVEMENT_CLOCK_MODE_024H ? "%02d%02d%02d%02d" : "%2d%2d%02d%02d",
+        movement_clock_mode_24h() == MOVEMENT_CLOCK_MODE_024H ? "%02d%02d%02d%02d%02d" : "%02d%2d%2d%02d%02d",
+        weeknumber,
         date_time.unit.day,
         date_time.unit.hour,
         date_time.unit.minute,
         date_time.unit.second
     );
 
-    watch_display_text_with_fallback(WATCH_POSITION_TOP_LEFT, watch_utility_get_long_weekday(date_time), watch_utility_get_weekday(date_time));
-    watch_display_text(WATCH_POSITION_TOP_RIGHT, buf);
-    watch_display_text(WATCH_POSITION_BOTTOM, buf + 2);
+    // watch_display_text_with_fallback(WATCH_POSITION_TOP_LEFT, watch_utility_get_long_weekday(date_time), watch_utility_get_weekday(date_time));
+    watch_display_text(WATCH_POSITION_TOP_LEFT, buf);
+    watch_display_text(WATCH_POSITION_TOP_RIGHT, buf + 2);
+    watch_display_text(WATCH_POSITION_BOTTOM, buf + 4);
 }
 
 static bool clock_display_some(watch_date_time_t current, watch_date_time_t previous) {
@@ -187,7 +195,7 @@ static void clock_display_low_energy(watch_date_time_t date_time) {
         date_time.unit.minute
     );
 
-    watch_display_text_with_fallback(WATCH_POSITION_TOP_LEFT, watch_utility_get_long_weekday(date_time), watch_utility_get_weekday(date_time));
+    // watch_display_text_with_fallback(WATCH_POSITION_TOP_LEFT, watch_utility_get_long_weekday(date_time), watch_utility_get_weekday(date_time));
     watch_display_text(WATCH_POSITION_TOP_RIGHT, buf);
     watch_display_text(WATCH_POSITION_BOTTOM, buf + 2);
 }
@@ -220,11 +228,11 @@ void clock_face_setup(uint8_t watch_face_index, void ** context_ptr) {
 void clock_face_activate(void *context) {
     clock_state_t *state = (clock_state_t *) context;
 
-    clock_stop_tick_tock_animation();
+    // clock_stop_tick_tock_animation();
 
-    clock_indicate_time_signal(state);
+    // clock_indicate_time_signal(state);
     clock_indicate_alarm();
-    clock_indicate_24h();
+    // clock_indicate_24h();
 
     watch_set_colon();
 
@@ -238,7 +246,7 @@ bool clock_face_loop(movement_event_t event, void *context) {
 
     switch (event.event_type) {
         case EVENT_LOW_ENERGY_UPDATE:
-            clock_start_tick_tock_animation();
+            // clock_start_tick_tock_animation();
             clock_display_low_energy(movement_get_local_date_time());
             break;
         case EVENT_TICK:
@@ -252,9 +260,9 @@ bool clock_face_loop(movement_event_t event, void *context) {
             state->date_time.previous = current;
 
             break;
-        case EVENT_ALARM_LONG_PRESS:
+        /* case EVENT_ALARM_LONG_PRESS:
             clock_toggle_time_signal(state);
-            break;
+            break; */
         case EVENT_BACKGROUND_TASK:
             // uncomment this line to snap back to the clock face when the hour signal sounds:
             // movement_move_to_face(state->watch_face_index);
